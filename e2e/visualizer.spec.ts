@@ -95,6 +95,28 @@ test("swap button exchanges the foreground and background colors", async ({
     expect(await bg.inputValue()).toBe(before.fg);
 });
 
+test("vertical layout fills the full viewport on a phone (not a centered square)", async ({
+    browser,
+}) => {
+    // Regression: the rotated stage is a flex child; without shrink-0 it
+    // collapsed to the narrow viewport width, becoming a square.
+    const ctx = await browser.newContext({
+        viewport: { width: 390, height: 844 },
+    });
+    const page = await ctx.newPage();
+    await page.goto("/");
+    await page.getByTestId("visualizer-input").fill("Casa Comigo Marry Me");
+    await page.getByTestId("orient-vertical").click();
+    await page.getByTestId("mode-large").click();
+    await expect(page.getByTestId("view-large")).toBeVisible();
+
+    const stage = page.locator('[data-testid="fullscreen-overlay"] .relative');
+    const box = await stage.boundingBox();
+    expect(box?.width).toBeGreaterThan(380);
+    expect(box?.height).toBeGreaterThan(800);
+    await ctx.close();
+});
+
 test("a deep link auto-opens the mode and the text persists on reload", async ({
     page,
 }) => {
