@@ -1,3 +1,14 @@
+## v1.7.1
+
+### Bug Fixes
+- prevent rotated stage from shrinking on mobile
+
+### Documentation
+- document shrink-0 requirement for rotated stage on mobile
+
+### Chores
+- bump version to 1.7.1
+
 ## v1.7.0
 
 ### Features
