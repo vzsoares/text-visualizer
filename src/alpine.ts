@@ -64,6 +64,7 @@ export interface TextVisualizerState {
     activeMode: VisualizerMode | null;
     qrSvg: string;
     marqueeDuration: number;
+    marqueeDist: number;
     open(m: VisualizerMode): void;
     close(): void;
     updateQr(): void;
@@ -84,6 +85,7 @@ export function textVisualizer(): TextVisualizerState {
         activeMode: null,
         qrSvg: "",
         marqueeDuration: 8,
+        marqueeDist: 0,
 
         init(this: AlpineThis) {
             this.$watch("text", () => {
@@ -121,12 +123,13 @@ export function textVisualizer(): TextVisualizerState {
 
         measureMarquee(this: AlpineThis) {
             const span = this.$refs.marqueeSpan;
-            const container = this.$refs.marqueeEl;
-            if (span && container && span.offsetWidth > 0) {
-                container.style.setProperty(
-                    "--marquee-dist",
-                    `${span.offsetWidth}px`,
-                );
+            if (span && span.offsetWidth > 0) {
+                // Store the measured width in reactive state (not as an
+                // imperative custom property): the marquee element's :style
+                // binding re-renders whenever marqueeDuration changes, which
+                // would wipe an imperatively-set --marquee-dist and break the
+                // loop. Keeping it in state means it's re-applied every render.
+                this.marqueeDist = span.offsetWidth;
             }
         },
 
