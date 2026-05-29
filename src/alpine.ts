@@ -63,6 +63,7 @@ export interface TextVisualizerState {
     text: string;
     activeMode: VisualizerMode | null;
     qrSvg: string;
+    marqueeDuration: number;
     open(m: VisualizerMode): void;
     close(): void;
     updateQr(): void;
@@ -81,6 +82,7 @@ export function textVisualizer(): TextVisualizerState {
         text: "",
         activeMode: null,
         qrSvg: "",
+        marqueeDuration: 8,
 
         init(this: AlpineThis) {
             this.$watch("text", () => {

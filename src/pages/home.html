@@ -106,17 +106,37 @@
             data-testid="view-large"
         ></p>
 
-        <!-- Marquee: two identical copies side by side; animation moves -50%
-             (exactly one copy's width) so the loop is perfectly seamless. -->
+        <!-- Marquee -->
         <div
             x-show="activeMode === 'marquee'"
             x-cloak
-            class="w-full overflow-hidden"
+            class="flex w-full flex-col"
             data-testid="view-marquee"
         >
-            <div x-ref="marqueeEl" class="animate-marquee inline-flex font-bold leading-none" style="font-size: 100vh;">
-                <span x-ref="marqueeSpan" x-text="text" class="shrink-0 pr-[0.5em]"></span>
-                <span x-text="text" class="shrink-0 pr-[0.5em]"></span>
+            <div class="overflow-hidden">
+                <div
+                    x-ref="marqueeEl"
+                    class="animate-marquee inline-flex font-bold leading-none"
+                    :style="`font-size: 100vh; animation-duration: ${marqueeDuration}s`"
+                >
+                    <span x-ref="marqueeSpan" x-text="text" class="shrink-0 pr-[0.5em]"></span>
+                    <span x-text="text" class="shrink-0 pr-[0.5em]"></span>
+                </div>
+            </div>
+            <!-- Speed control -->
+            <div class="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-3 rounded-full border border-base-300 bg-base-100/80 px-4 py-2 backdrop-blur-sm">
+                <span class="text-xs opacity-50">slow</span>
+                <input
+                    type="range"
+                    min="2"
+                    max="30"
+                    step="1"
+                    x-model.number="marqueeDuration"
+                    class="range range-xs w-28"
+                    data-testid="marquee-speed"
+                    aria-label="Marquee speed"
+                />
+                <span class="text-xs opacity-50">fast</span>
             </div>
         </div>
 
