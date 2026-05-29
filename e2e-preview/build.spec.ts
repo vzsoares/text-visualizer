@@ -1,5 +1,4 @@
 import { expect, test } from "@playwright/test";
-import { posts } from "../src/content/posts";
 
 // baseURL already includes the Pages sub-path, so navigate with RELATIVE paths
 // (a leading "/" would escape to the origin root).
@@ -16,9 +15,7 @@ test("home loads under the base path with all assets and boots Alpine", async ({
     });
 
     await page.goto("./");
-    await expect(
-        page.getByRole("heading", { name: "Vite + Alpine + Tailwind" }),
-    ).toBeVisible();
+    await expect(page.getByTestId("visualizer-input")).toBeVisible();
     await expect.poll(() => page.evaluate(() => "Alpine" in window)).toBe(true);
     expect(failures, "no failed requests on the built home page").toEqual([]);
 });
@@ -26,16 +23,15 @@ test("home loads under the base path with all assets and boots Alpine", async ({
 test("a deep link resolves and survives a reload (SPA fallback + basePath)", async ({
     page,
 }) => {
-    const slug = posts[0].slug;
-    await page.goto(`blog/${slug}`);
+    // Navigate to a non-index path to exercise the 404.html SPA fallback.
+    await page.goto("notfound-path");
     await expect(
-        page.getByRole("heading", { name: posts[0].title, level: 1 }),
+        page.getByRole("heading", { name: "Page not found" }),
     ).toBeVisible();
 
-    // Reloading a non-index path is the GitHub Pages 404.html / SPA-fallback case.
     await page.reload();
     await expect(
-        page.getByRole("heading", { name: posts[0].title, level: 1 }),
+        page.getByRole("heading", { name: "Page not found" }),
     ).toBeVisible();
 
     // The URL stays under a single base (guards the double-base regression).
@@ -46,9 +42,14 @@ test("a deep link resolves and survives a reload (SPA fallback + basePath)", asy
 
 test("client navigation keeps the base prefix", async ({ page }) => {
     await page.goto("./");
-    await page.getByRole("link", { name: "Blog", exact: true }).click();
-    await expect(page).toHaveURL(/\/vite-alpine-tailwind\/blog$/);
-    await expect(
-        page.getByRole("heading", { name: "Blog", level: 1 }),
-    ).toBeVisible();
+    // Type text and open a mode to exercise client-side state.
+    const input = page.getByTestId("visualizer-input");
+    await input.fill("test");
+    await page.getByTestId("mode-large").click();
+    await expect(page.getByTestId("fullscreen-overlay")).toBeVisible();
+    await page.getByTestId("close-btn").click();
+    await expect(page.getByTestId("fullscreen-overlay")).toBeHidden();
+    // URL stays at the base — no extra path segments.
+    const path = new URL(page.url()).pathname;
+    expect(path).toMatch(/\/vite-alpine-tailwind\/?$/);
 });
