@@ -4,4 +4,4 @@
  * derives pinecone's `basePath` from `import.meta.env.BASE_URL`). Keep free of
  * browser/Node-only APIs so both can import it.
  */
-export const BASE = "/vite-alpine-tailwind/";
+export const BASE = "/text-visualizer/";

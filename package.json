@@ -1,7 +1,7 @@
 {
-    "name": "vite-alpine-tailwind",
+    "name": "text-visualizer",
     "version": "1.4.1",
-    "description": "A lightweight client-side SPA starter combining Vite, Alpine.js and Tailwind CSS — UI authored as native Web Components, routed with pinecone-router",
+    "description": "Paste text, pick a format — QR code, big text, marquee, or blink — shown fullscreen.",
     "scripts": {
         "dev": "vite",
         "build": "vite build",
@@ -28,26 +28,21 @@
         }
     },
     "keywords": [
-        "vite",
-        "alpinejs",
+        "text-visualizer",
+        "qr-code",
+        "alpine-js",
         "tailwindcss",
-        "web-components",
-        "custom-elements",
-        "pinecone-router",
-        "spa",
-        "template",
-        "starter",
-        "typescript"
+        "vite"
     ],
     "author": "vzsoares",
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/vzsoares/vite-alpine-tailwind.git"
+        "url": "https://github.com/vzsoares/text-visualizer.git"
     },
-    "homepage": "https://github.com/vzsoares/vite-alpine-tailwind",
+    "homepage": "https://vzsoares.github.io/text-visualizer/",
     "bugs": {
-        "url": "https://github.com/vzsoares/vite-alpine-tailwind/issues"
+        "url": "https://github.com/vzsoares/text-visualizer/issues"
     },
     "devDependencies": {
         "@biomejs/biome": "^2.4.15",

@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="./public/og.png" alt="Text Visualizer" width="640" />
-</p>
-
 # Text Visualizer
 
 Paste text, pick a format, see it take over the screen.

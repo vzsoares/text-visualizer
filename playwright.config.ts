@@ -10,7 +10,7 @@ import { defineConfig, devices } from "@playwright/test";
 // single suite with `playwright test --project=dev|preview`.
 const DEV_PORT = 5273;
 const PREVIEW_PORT = 5274;
-const BASE = "/vite-alpine-tailwind/";
+const BASE = "/text-visualizer/";
 
 const devURL = `http://localhost:${DEV_PORT}`;
 const previewURL = `http://localhost:${PREVIEW_PORT}${BASE}`;

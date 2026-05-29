@@ -42,10 +42,10 @@
 
 @keyframes marquee {
     0% {
-        transform: translateX(100vw);
+        transform: translateX(0);
     }
     100% {
-        transform: translateX(calc(-100% - 100vw));
+        transform: translateX(-50%);
     }
 }
 

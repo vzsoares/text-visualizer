@@ -106,18 +106,18 @@
             data-testid="view-large"
         ></p>
 
-        <!-- Marquee: font fills viewport height, scrolls full width -->
+        <!-- Marquee: two identical copies side by side; animation moves -50%
+             (exactly one copy's width) so the loop is perfectly seamless. -->
         <div
             x-show="activeMode === 'marquee'"
             x-cloak
             class="w-full overflow-hidden"
             data-testid="view-marquee"
         >
-            <p
-                x-text="text"
-                class="animate-marquee whitespace-nowrap font-bold leading-none"
-                style="font-size: 100vh;"
-            ></p>
+            <div class="animate-marquee flex shrink-0 font-bold leading-none" style="font-size: 100vh;">
+                <span x-text="text" class="shrink-0 pr-[0.5em]"></span>
+                <span x-text="text" class="shrink-0 pr-[0.5em]"></span>
+            </div>
         </div>
 
         <!-- Blink: fitText scales to fill the full viewport -->

@@ -36,8 +36,8 @@ test("a deep link resolves and survives a reload (SPA fallback + basePath)", asy
 
     // The URL stays under a single base (guards the double-base regression).
     const path = new URL(page.url()).pathname;
-    expect(path.startsWith("/vite-alpine-tailwind/")).toBe(true);
-    expect(path).not.toContain("vite-alpine-tailwind/vite-alpine-tailwind");
+    expect(path.startsWith("/text-visualizer/")).toBe(true);
+    expect(path).not.toContain("text-visualizer/text-visualizer");
 });
 
 test("client navigation keeps the base prefix", async ({ page }) => {
@@ -51,5 +51,5 @@ test("client navigation keeps the base prefix", async ({ page }) => {
     await expect(page.getByTestId("fullscreen-overlay")).toBeHidden();
     // URL stays at the base — no extra path segments.
     const path = new URL(page.url()).pathname;
-    expect(path).toMatch(/\/vite-alpine-tailwind\/?$/);
+    expect(path).toMatch(/\/text-visualizer\/?$/);
 });
