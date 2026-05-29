@@ -1,3 +1,11 @@
+## v1.6.0
+
+### Bug Fixes
+- use requestAnimationFrame for measurement and correct speed labels
+
+### Chores
+- bump version to 1.6.0
+
 ## v1.5.0
 
 ### Features
