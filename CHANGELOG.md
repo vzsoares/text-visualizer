@@ -1,3 +1,11 @@
+## v1.4.2
+
+### Documentation
+- rebrand to text-visualizer and fix marquee seamless loop
+
+### Chores
+- bump version to 1.4.2
+
 ## v1.4.1
 
 ### Chores
