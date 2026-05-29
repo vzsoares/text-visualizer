@@ -16,6 +16,13 @@ interface PineconeRouterApi {
     settings(values?: Partial<PineconeRouterSettings>): PineconeRouterSettings;
 }
 
+/** Augment Alpine with the `$persist` magic the persist plugin adds. */
+declare module "alpinejs" {
+    interface Alpine {
+        $persist<T>(value: T): { as(key: string): T };
+    }
+}
+
 declare global {
     const __APP_VERSION__: string;
 

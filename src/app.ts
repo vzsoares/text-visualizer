@@ -1,24 +1,21 @@
+import persist from "@alpinejs/persist";
 import Alpine from "alpinejs";
 import PineconeRouter from "pinecone-router";
-import { blogPost, counter, textVisualizer } from "./alpine";
-import { posts } from "./content/posts";
+import { textVisualizer } from "./alpine";
 
-// Register the router plugin + typed Alpine.data components — all must run
-// before Alpine.start(). NOTE: pinecone-router v7 takes NO options here;
-// settings() is a separate function called in `alpine:init` below.
+// Register plugins + the typed Alpine.data component — all must run before
+// Alpine.start(). NOTE: pinecone-router v7 takes NO options here; settings() is
+// a separate function called in `alpine:init` below.
+Alpine.plugin(persist);
 Alpine.plugin(PineconeRouter);
-Alpine.data("counter", counter);
-Alpine.data("blogPost", blogPost);
 Alpine.data("textVisualizer", textVisualizer);
 
 document.addEventListener("alpine:init", () => {
     // Data the plain-HTML pages read at runtime (they can't import TS): the
-    // build-time version (footer), the deploy base path (asset URLs), and the
-    // blog posts (blog index `x-for`). See src/pages/*.html.
+    // build-time version (footer) and the deploy base path (asset URLs).
     Alpine.store("app", {
         version: __APP_VERSION__,
         base: import.meta.env.BASE_URL,
-        posts,
     });
 
     window.PineconeRouter.settings({
@@ -33,7 +30,7 @@ document.addEventListener("alpine:init", () => {
     });
 });
 
-// Expose for devtools / debugging.
+// Expose for devtools / debugging (and the persisted() helper in alpine.ts).
 window.Alpine = Alpine;
 
 // Start — walks the DOM, registers magics ($router/$params), attaches the

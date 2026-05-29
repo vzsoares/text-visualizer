@@ -5,9 +5,13 @@ Guidance for AI coding agents working in this repo. Humans: see `README.md`.
 ## What this is
 
 **Text Visualizer** — a lightweight client-side SPA built on Vite + Alpine.js + Tailwind.
-The user types text, picks a display mode (QR code, large text, marquee, blink), and the
-result opens fullscreen. UI is authored as a plain HTML page, made reactive with Alpine,
-and routed with **pinecone-router**. Nothing is prerendered — the server ships one `index.html` shell.
+The user types text, picks a display mode (QR, large text, marquee, blink, mirror, morse),
+tunes a few controls, and the result opens fullscreen. UI is authored as a plain HTML page,
+made reactive with Alpine, and routed with **pinecone-router**. Nothing is prerendered — the
+server ships one `index.html` shell.
+
+All controls (text, mode, speed, colors, orientation) live on the home page; the fullscreen
+view is deliberately chrome-free — just the visualization and a close button.
 
 ## Always verify before delivering
 
@@ -32,15 +36,22 @@ several layout/timing bugs are only visible visually.
 ## How the repo works
 
 - **One page (`home.html`).** The entire app is `src/pages/home.html` — an Alpine component
-  (`x-data="textVisualizer"`) that manages `text`, `activeMode`, and `qrSvg` state.
+  (`x-data="textVisualizer"`) that manages persisted settings + transient view state.
 - **The `page-templates` plugin** (`vite.config.ts`) serves `src/pages/*.html` at
   `/pages/*.html` in dev and emits them to `dist/pages/` on build.
 - **Persistent chrome is inline** in `index.html` — minimal nav (wordmark + dark-mode toggle)
-  and a version footer.
-- **Reactive logic is in `src/alpine.ts`** — `textVisualizer()` factory: `open(mode)`,
-  `close()`, `updateQr()`, `fitText(el)`. DOM-free methods are unit-tested in Vitest.
-- **`fitText`** binary-searches the maximum font size that fits the viewport using an
-  off-screen helper element (avoids `overflow:hidden` measurement skew).
+  and a version+credit footer.
+- **Pure logic is in `src/modes.ts`** (DOM/Alpine-free, unit-tested in `modes.test.ts`):
+  the **mode registry** (`MODES` — add a mode here + a matching `x-show` view; the home
+  buttons render from it via `x-for`), Morse conversion (`textToMorse`/`morseTimeline`),
+  the centralized `speed` → per-mode timing mappers, and deep-link `encodeQuery`/`decodeQuery`.
+- **Reactive glue is in `src/alpine.ts`** — the `textVisualizer()` factory: `open(mode)`,
+  `close()`, `updateQr()`, `fitText`, `fitMarqueeFont`, the morse player, fullscreen +
+  wake-lock, and URL sync. Browser APIs are feature-guarded so the factory stays
+  unit-testable under Node.
+- **`fitText`** binary-searches the max font size that fits using an off-screen helper
+  (avoids `overflow:hidden` skew); it's **orientation-aware** (swaps the available
+  width/height when the stage is rotated for vertical layout).
 - **`src/config.ts`** holds the deploy base path (`BASE = "/text-visualizer/"`), shared
   by the build and the router.
 
@@ -63,10 +74,34 @@ release-it (releases). Vite 8 is Rolldown/**oxc**-based. Runtime libs: `alpinejs
   element — the overlay's `overflow:hidden` clips `getBoundingClientRect()` and returns
   the container width, not the text's intrinsic width.
 - **Alpine magic props (`$watch`, `$nextTick`, `$refs`) aren't available in unit tests.**
-  Inject noop stubs: `Object.assign(textVisualizer(), { $nextTick: () => {} })`.
-- **Marquee loops via two side-by-side copies.** The animation moves `translateX(0)`
-  → `translateX(-50%)` — exactly one copy's width — so the second copy seamlessly
-  replaces the first with no visible gap or jump.
+  Inject noop stubs: `Object.assign(textVisualizer(), { $nextTick: () => {} })`. Keep all
+  DOM/browser work inside `$nextTick`/`requestAnimationFrame` callbacks or behind
+  `typeof window/document/navigator` guards so the factory runs under Node (`test.environment: "node"`).
+- **`persisted(value, key)` is a node-safe `$persist` wrapper.** It calls
+  `window.Alpine.$persist(v).as("tv-"+key)` in the browser but returns the plain value when
+  `window`/`$persist` is absent (unit tests). The persist plugin is registered in `app.ts`.
+- **`@alpinejs/persist` ships no types.** Its ambient `declare module` lives in
+  `src/alpinejs-persist.d.ts` (a file with **no** top-level import/export, so it *provides*
+  types); the `$persist` magic is added to Alpine via a module augmentation in `globals.d.ts`.
+- **NEVER put `x-show` and a *string* `:style` on the same element.** `x-show` toggles the
+  element's inline `display`; a string `:style` binding rewrites the whole `style` attribute
+  on every re-render and **wipes `display:none`**, so the element pops visible. Use the
+  **object** form (`:style="{ background: bg }"`) — Alpine sets only those properties and
+  leaves `x-show`'s `display` alone. (Bit the overlay and the blink `<p>`.)
+- **Marquee loops via two side-by-side copies**, translating `translateX(0)` →
+  `translateX(calc(-1 * var(--marquee-dist)))`. `--marquee-dist` is the measured width of one
+  copy, stored in **reactive state** (`marqueeDist`) and emitted inside the element's `:style`
+  string — NOT set imperatively with `style.setProperty`, which the `:style` re-render (on
+  speed change) would wipe, breaking the loop. Measure only after a `requestAnimationFrame`
+  so layout has committed.
+- **Marquee font is canvas-measured** (`fitMarqueeFont`): `ctx.measureText` gives the glyph
+  ink height (`actualBoundingBoxAscent + actualBoundingBoxDescent`), sized to ~90% of the
+  cross-axis so descenders (g/p/q) aren't clipped — a fixed `font-size: 100vh` clips them.
+- **All text modes (large, mirror, blink) must call `fitText`.** They share `TEXT_REFS`
+  (mode → `x-ref`); forgetting one leaves that mode at the default tiny font.
+- **Vertical layout rotates the stage**, not each element: the overlay's inner stage gets
+  `rotate-90` + swapped `100vh`/`100vw` dims. Tailwind 4's `rotate-90` uses the standalone
+  `rotate` CSS property (computed `transform` stays `none` — test the right property).
 - **Tailwind auto-scans `src/`**, so classes used only in `src/pages/*.html` are
   generated — no `@source` needed.
 - **Biome lints the page HTML.** Alpine-driven anchors (text via `x-text`) trip

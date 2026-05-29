@@ -1,81 +1,39 @@
 import { describe, expect, it } from "vitest";
-import { blogPost, counter, textVisualizer } from "./alpine";
+import { textVisualizer } from "./alpine";
+import { blinkDurationSec, marqueeDurationSec } from "./modes";
 
-describe("counter", () => {
-    it("increments, decrements, and resets from its start value", () => {
-        const c = counter(2);
-        expect(c.count).toBe(2);
-        c.increment();
-        expect(c.count).toBe(3);
-        c.decrement();
-        c.decrement();
-        expect(c.count).toBe(1);
-        c.reset();
-        expect(c.count).toBe(2);
-    });
-
-    it("defaults to 0", () => {
-        expect(counter().count).toBe(0);
-    });
-});
-
-describe("blogPost", () => {
-    it("resolves a post and its prev/next neighbours by slug", () => {
-        const b = blogPost();
-        b.load("sed-do-eiusmod"); // the middle post
-        expect(b.post?.slug).toBe("sed-do-eiusmod");
-        expect(b.prev?.slug).toBe("lorem-ipsum-dolor");
-        expect(b.next?.slug).toBe("ut-enim-ad-minim");
-    });
-
-    it("has no prev on the first post", () => {
-        const b = blogPost();
-        b.load("lorem-ipsum-dolor");
-        expect(b.prev).toBeUndefined();
-        expect(b.next?.slug).toBe("sed-do-eiusmod");
-    });
-
-    it("leaves post undefined for an unknown slug", () => {
-        const b = blogPost();
-        b.load("nope");
-        expect(b.post).toBeUndefined();
-        expect(b.prev).toBeUndefined();
-        expect(b.next).toBeUndefined();
-    });
-});
+// Alpine injects $nextTick at runtime; in Node we stub it as a noop so the
+// DOM-touching callbacks inside open() never run (they're unreachable here).
+const make = () =>
+    Object.assign(textVisualizer(), { $nextTick: (_cb: () => void) => {} });
 
 describe("textVisualizer", () => {
-    it("initializes with empty text and no active mode", () => {
+    it("initializes with empty text, no active mode, default settings", () => {
         const v = textVisualizer();
         expect(v.text).toBe("");
         expect(v.activeMode).toBeNull();
         expect(v.qrSvg).toBe("");
+        expect(v.color).toBe("#000000");
+        expect(v.bg).toBe("#ffffff");
     });
 
     it("open() sets the active mode", () => {
-        // Inject a noop $nextTick — Alpine provides this at runtime; not available in unit tests.
-        const v = Object.assign(textVisualizer(), {
-            $nextTick: (_cb: () => void) => {},
-        });
+        const v = make();
         v.open("large");
         expect(v.activeMode).toBe("large");
-        v.open("blink");
-        expect(v.activeMode).toBe("blink");
+        v.open("mirror");
+        expect(v.activeMode).toBe("mirror");
     });
 
     it("close() clears the active mode", () => {
-        const v = Object.assign(textVisualizer(), {
-            $nextTick: (_cb: () => void) => {},
-        });
+        const v = make();
         v.open("marquee");
         v.close();
         expect(v.activeMode).toBeNull();
     });
 
-    it("open('qr') with text generates an SVG", () => {
-        const v = Object.assign(textVisualizer(), {
-            $nextTick: (_cb: () => void) => {},
-        });
+    it("open('qr') with text generates an SVG using the chosen colors", () => {
+        const v = make();
         v.text = "hello";
         v.open("qr");
         expect(v.qrSvg).toContain("<svg");
@@ -86,5 +44,21 @@ describe("textVisualizer", () => {
         v.text = "   ";
         v.updateQr();
         expect(v.qrSvg).toBe("");
+    });
+
+    it("swapColors swaps foreground and background", () => {
+        const v = textVisualizer();
+        v.color = "#111111";
+        v.bg = "#eeeeee";
+        v.swapColors();
+        expect(v.color).toBe("#eeeeee");
+        expect(v.bg).toBe("#111111");
+    });
+
+    it("derived durations follow the centralized speed", () => {
+        const v = textVisualizer();
+        v.speed = 2;
+        expect(v.marqueeDuration).toBe(marqueeDurationSec(2));
+        expect(v.blinkDuration).toBe(blinkDurationSec(2));
     });
 });
