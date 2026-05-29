@@ -1,3 +1,14 @@
+## v1.5.0
+
+### Features
+- add adjustable speed control
+
+### Bug Fixes
+- calculate exact text width for seamless animation loop
+
+### Chores
+- bump version to 1.5.0
+
 ## v1.4.2
 
 ### Documentation
