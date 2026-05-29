@@ -67,6 +67,7 @@ export interface TextVisualizerState {
     open(m: VisualizerMode): void;
     close(): void;
     updateQr(): void;
+    measureMarquee(): void;
     fitText(el: HTMLElement): void;
     init(): void;
 }
@@ -87,6 +88,7 @@ export function textVisualizer(): TextVisualizerState {
         init(this: AlpineThis) {
             this.$watch("text", () => {
                 if (this.activeMode === "qr") this.updateQr();
+                if (this.activeMode === "marquee") this.measureMarquee();
             });
         },
 
@@ -101,18 +103,11 @@ export function textVisualizer(): TextVisualizerState {
                 });
             }
             if (m === "marquee") {
-                this.$nextTick(() => {
-                    const span = this.$refs.marqueeSpan;
-                    const container = this.$refs.marqueeEl;
-                    if (span && container) {
-                        // Set the exact pixel distance so the animation moves
-                        // by exactly one copy's width — guarantees a seamless loop.
-                        container.style.setProperty(
-                            "--marquee-dist",
-                            `${span.offsetWidth}px`,
-                        );
-                    }
-                });
+                // $nextTick: Alpine has applied x-show/x-text.
+                // rAF: browser has committed layout so offsetWidth is accurate.
+                this.$nextTick(() =>
+                    requestAnimationFrame(() => this.measureMarquee()),
+                );
             }
         },
 
@@ -122,6 +117,17 @@ export function textVisualizer(): TextVisualizerState {
 
         updateQr(this: TextVisualizerState) {
             this.qrSvg = this.text.trim() ? renderSVG(this.text) : "";
+        },
+
+        measureMarquee(this: AlpineThis) {
+            const span = this.$refs.marqueeSpan;
+            const container = this.$refs.marqueeEl;
+            if (span && container && span.offsetWidth > 0) {
+                container.style.setProperty(
+                    "--marquee-dist",
+                    `${span.offsetWidth}px`,
+                );
+            }
         },
 
         // Binary-search the largest font-size (px) where the text fits within
