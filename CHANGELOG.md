@@ -1,3 +1,11 @@
+## v1.6.1
+
+### Bug Fixes
+- preserve marquee distance in reactive state
+
+### Chores
+- bump version to 1.6.1
+
 ## v1.6.0
 
 ### Bug Fixes
