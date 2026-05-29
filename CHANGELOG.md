@@ -1,3 +1,11 @@
+## v1.4.1
+
+### Chores
+- bump version to 1.4.1
+
+### Other
+- update tests for text visualizer tool
+
 ## v1.4.0
 
 ### Features
