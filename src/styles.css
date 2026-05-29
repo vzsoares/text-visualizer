@@ -1,0 +1,42 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+/* daisyUI component library. Themes are switched via `data-theme` on <body>
+   (wired to the dark-mode toggle in index.html). */
+@plugin "daisyui" {
+    themes:
+        light --default,
+        dark --prefersdark;
+}
+
+/* Brand palette — the gradient/accent identity. Rebrand the whole site by
+   editing these three tokens; they generate `brand-1/2/3` color utilities
+   (e.g. `from-brand-1`, `text-brand-1`). */
+@theme {
+    --color-brand-1: #9333ea; /* purple-600 */
+    --color-brand-2: #2563eb; /* blue-600 */
+    --color-brand-3: #0d9488; /* teal-600 */
+}
+
+/* Map daisyUI's `primary` to the brand color so `btn-primary` etc. match. */
+[data-theme="light"],
+[data-theme="dark"] {
+    --color-primary: var(--color-brand-1);
+    --color-primary-content: #ffffff;
+}
+
+/* Drive `dark:` utilities from a `.dark` class (toggled in index.html) instead
+   of the OS `prefers-color-scheme` default, so the theme toggle controls them. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Prevent FOUC: hide elements with x-cloak until Alpine initializes. */
+[x-cloak] {
+    /* biome-ignore lint/complexity/noImportantStyles: x-cloak needs !important to reliably prevent FOUC */
+    display: none !important;
+}
+
+/* Visible keyboard-focus indicator for all interactive elements. */
+:focus-visible {
+    outline: 2px solid var(--color-brand-1);
+    outline-offset: 2px;
+    border-radius: 2px;
+}

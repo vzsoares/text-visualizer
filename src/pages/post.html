@@ -1,0 +1,27 @@
+<!-- Single post (/blog/:slug). Loaded by pinecone-router into <main id="app">.
+     The blogPost Alpine component resolves the post from the slug;
+     x-effect="load($params.slug)" re-resolves on param change so prev/next
+     navigation (same route, no re-render) updates the content. -->
+<article x-data="blogPost" x-effect="load($params.slug)" class="flex-1 px-8 py-16">
+    <div class="mx-auto max-w-2xl">
+        <div x-show="post" x-cloak>
+            <a href="/blog" class="text-sm text-brand-1 hover:underline">← Back to blog</a>
+            <h1 x-text="post?.title" class="mt-4 mb-2 bg-gradient-to-r from-brand-1 to-brand-2 bg-clip-text text-4xl font-bold text-transparent"></h1>
+            <p x-text="post?.date" class="mb-8 text-sm opacity-60"></p>
+            <div class="prose max-w-none dark:prose-invert" x-html="post?.body"></div>
+
+            <nav class="mt-12 flex justify-between gap-4 border-t border-gray-200 pt-6 text-sm dark:border-gray-800">
+                <a x-show="prev" :href="'/blog/' + (prev?.slug ?? '')" x-text="'← ' + (prev?.title ?? '')" class="text-brand-1 hover:underline"></a>
+                <span x-show="!prev"></span>
+                <a x-show="next" :href="'/blog/' + (next?.slug ?? '')" x-text="(next?.title ?? '') + ' →'" class="text-right text-brand-1 hover:underline"></a>
+                <span x-show="!next"></span>
+            </nav>
+        </div>
+
+        <div x-show="!post" x-cloak class="py-16 text-center">
+            <h1 class="mb-3 text-3xl font-bold">Post not found</h1>
+            <p class="mb-8 opacity-80">No post matches this URL.</p>
+            <a href="/blog" class="btn btn-primary">Back to blog</a>
+        </div>
+    </div>
+</article>

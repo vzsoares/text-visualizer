@@ -1,0 +1,23 @@
+<!-- Blog index (src/pages/blog.html). Loaded by pinecone-router into
+     <main id="app">. Iterates the posts on $store.app.posts (see
+     src/content/posts.ts). Links are authored without the base path — pinecone
+     prepends it and intercepts clicks. -->
+<div class="flex-1 px-8 py-16">
+    <div class="mx-auto max-w-2xl">
+        <h1 class="mb-3 bg-gradient-to-r from-brand-1 to-brand-2 bg-clip-text text-4xl font-bold text-transparent">Blog</h1>
+        <p class="mb-10 opacity-80">Lorem ipsum posts — each renders client-side from static data.</p>
+        <ul class="space-y-6">
+            <template x-for="post in $store.app.posts" :key="post.slug">
+                <li>
+                    <a :href="'/blog/' + post.slug" class="card border border-base-300 bg-base-100 transition-shadow hover:shadow-lg">
+                        <div class="card-body">
+                            <h2 x-text="post.title" class="card-title transition-colors hover:text-brand-1"></h2>
+                            <p x-text="post.date" class="text-sm opacity-60"></p>
+                            <p x-text="post.excerpt" class="opacity-80"></p>
+                        </div>
+                    </a>
+                </li>
+            </template>
+        </ul>
+    </div>
+</div>

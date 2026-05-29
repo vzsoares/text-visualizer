@@ -1,0 +1,18 @@
+version: 2
+updates:
+  # npm/Bun dependencies (package.json)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      # One grouped PR keeps the noise down for a template.
+      dependencies:
+        patterns: ["*"]
+
+  # GitHub Actions used in the workflows
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

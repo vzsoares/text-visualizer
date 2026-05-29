@@ -1,0 +1,80 @@
+<!-- Home page. Loaded by pinecone-router into <main id="app"> (see index.html
+     route table). Plain HTML + Alpine; reads $store.app for the base path. -->
+<section class="relative flex flex-1 flex-col items-center justify-center px-4 py-16">
+    <div class="absolute inset-0 z-0 overflow-hidden">
+        <div class="absolute -inset-[10%] bg-gradient-to-r from-purple-100 via-blue-100 to-teal-100 opacity-50 blur-3xl dark:from-purple-900/30 dark:via-blue-900/30 dark:to-teal-900/30 dark:opacity-30"></div>
+    </div>
+    <div class="relative z-10 mx-auto max-w-3xl text-center">
+        <div class="mb-8 flex items-center justify-center space-x-8">
+            <img :src="$store.app.base + 'logos/vite.svg'" alt="Vite logo" class="h-14 w-14 animate-pulse" />
+            <div class="text-4xl font-light">+</div>
+            <img :src="$store.app.base + 'logos/alpine.svg'" alt="Alpine.js logo" class="h-14 w-14" />
+            <div class="text-4xl font-light">+</div>
+            <img :src="$store.app.base + 'logos/tailwind.svg'" alt="Tailwind CSS logo" class="h-14 w-14" />
+        </div>
+        <h1 class="mb-6 bg-gradient-to-r from-brand-1 via-brand-2 to-brand-3 bg-clip-text text-5xl font-bold text-transparent">Vite + Alpine + Tailwind</h1>
+        <p class="mx-auto mb-8 max-w-2xl text-xl opacity-80">
+            A lightweight SPA starter: pages are plain HTML files, routed entirely
+            on the client with pinecone-router.
+        </p>
+        <div class="flex flex-wrap justify-center gap-4">
+            <a href="/about" class="btn btn-primary">Get Started</a>
+            <a href="https://github.com/vzsoares/vite-alpine-tailwind" target="_blank" rel="noopener" native class="btn btn-outline">View on GitHub</a>
+        </div>
+    </div>
+</section>
+
+<section class="px-8 py-16">
+    <div class="mx-auto max-w-6xl">
+        <h2 class="mb-12 text-center text-3xl font-bold">Features</h2>
+        <div class="grid gap-8 md:grid-cols-3">
+            <div class="card border border-base-300 bg-base-100 transition-shadow hover:shadow-lg">
+                <div class="card-body">
+                    <h3 class="card-title"><img :src="$store.app.base + 'logos/vite.svg'" alt="Vite" class="h-8 w-8" /><span>Vite</span></h3>
+                    <p class="opacity-80">Lightning-fast dev server and optimized builds with HMR and true ESM support.</p>
+                </div>
+            </div>
+            <div class="card border border-base-300 bg-base-100 transition-shadow hover:shadow-lg">
+                <div class="card-body">
+                    <h3 class="card-title"><img :src="$store.app.base + 'logos/alpine.svg'" alt="Alpine.js" class="h-8 w-8" /><span>Alpine.js</span></h3>
+                    <p class="opacity-80">Minimal framework for client-side interactivity — the reactivity behind every page here.</p>
+                </div>
+            </div>
+            <div class="card border border-base-300 bg-base-100 transition-shadow hover:shadow-lg">
+                <div class="card-body">
+                    <h3 class="card-title"><img :src="$store.app.base + 'logos/tailwind.svg'" alt="Tailwind CSS" class="h-8 w-8" /><span>Tailwind CSS</span></h3>
+                    <p class="opacity-80">Utility-first styling (+ daisyUI components) applied straight to the page markup.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="px-8 py-16">
+    <div class="mx-auto max-w-6xl">
+        <h2 class="mb-4 text-center text-3xl font-bold">Interactive Demo</h2>
+        <p class="mx-auto mb-12 max-w-2xl text-center opacity-80">
+            A typed Alpine component — <code class="font-mono text-brand-1">counter()</code> in
+            <code class="font-mono text-brand-1">alpine.ts</code> — wired up with
+            <code class="font-mono text-brand-1">x-data</code>.
+        </p>
+        <div
+            x-data="counter(0)"
+            data-testid="demo-card"
+            class="card mx-auto max-w-sm border border-base-300 bg-base-100 shadow-sm"
+        >
+            <div class="card-body items-center text-center">
+                <p
+                    data-testid="counter-value"
+                    x-text="count"
+                    class="bg-gradient-to-r from-brand-1 to-brand-2 bg-clip-text text-5xl font-bold text-transparent"
+                >0</p>
+                <div class="card-actions mt-4 justify-center">
+                    <button type="button" data-testid="counter-decrement" @click="decrement()" aria-label="Decrement" class="btn btn-outline">−</button>
+                    <button type="button" data-testid="counter-reset" @click="reset()" class="btn btn-ghost">Reset</button>
+                    <button type="button" data-testid="counter-increment" @click="increment()" aria-label="Increment" class="btn btn-primary">+</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
