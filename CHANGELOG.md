@@ -1,3 +1,14 @@
+## v1.7.0
+
+### Features
+- add mirror and morse modes with centralized controls and deep-linking
+
+### Bug Fixes
+- adjust swap colors icon vertical alignment
+
+### Chores
+- bump version to 1.7.0
+
 ## v1.6.1
 
 ### Bug Fixes
