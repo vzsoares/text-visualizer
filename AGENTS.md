@@ -102,6 +102,10 @@ release-it (releases). Vite 8 is Rolldown/**oxc**-based. Runtime libs: `alpinejs
 - **Vertical layout rotates the stage**, not each element: the overlay's inner stage gets
   `rotate-90` + swapped `100vh`/`100vw` dims. Tailwind 4's `rotate-90` uses the standalone
   `rotate` CSS property (computed `transform` stays `none` — test the right property).
+- **The rotated stage MUST be `shrink-0`.** It's a flex child of the centered overlay; in
+  vertical its `width:100vh` exceeds the (portrait) viewport width, so default flex-shrink
+  collapses it to a square — text then fills only a centered square, not the full long axis.
+  Only reproduces on mobile (on desktop `100vh` < viewport width, so it never shrinks).
 - **Tailwind auto-scans `src/`**, so classes used only in `src/pages/*.html` are
   generated — no `@source` needed.
 - **Biome lints the page HTML.** Alpine-driven anchors (text via `x-text`) trip
