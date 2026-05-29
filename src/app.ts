@@ -1,6 +1,6 @@
 import Alpine from "alpinejs";
 import PineconeRouter from "pinecone-router";
-import { blogPost, counter } from "./alpine";
+import { blogPost, counter, textVisualizer } from "./alpine";
 import { posts } from "./content/posts";
 
 // Register the router plugin + typed Alpine.data components — all must run
@@ -9,6 +9,7 @@ import { posts } from "./content/posts";
 Alpine.plugin(PineconeRouter);
 Alpine.data("counter", counter);
 Alpine.data("blogPost", blogPost);
+Alpine.data("textVisualizer", textVisualizer);
 
 document.addEventListener("alpine:init", () => {
     // Data the plain-HTML pages read at runtime (they can't import TS): the

@@ -1,80 +1,134 @@
-<!-- Home page. Loaded by pinecone-router into <main id="app"> (see index.html
-     route table). Plain HTML + Alpine; reads $store.app for the base path. -->
-<section class="relative flex flex-1 flex-col items-center justify-center px-4 py-16">
-    <div class="absolute inset-0 z-0 overflow-hidden">
-        <div class="absolute -inset-[10%] bg-gradient-to-r from-purple-100 via-blue-100 to-teal-100 opacity-50 blur-3xl dark:from-purple-900/30 dark:via-blue-900/30 dark:to-teal-900/30 dark:opacity-30"></div>
-    </div>
-    <div class="relative z-10 mx-auto max-w-3xl text-center">
-        <div class="mb-8 flex items-center justify-center space-x-8">
-            <img :src="$store.app.base + 'logos/vite.svg'" alt="Vite logo" class="h-14 w-14 animate-pulse" />
-            <div class="text-4xl font-light">+</div>
-            <img :src="$store.app.base + 'logos/alpine.svg'" alt="Alpine.js logo" class="h-14 w-14" />
-            <div class="text-4xl font-light">+</div>
-            <img :src="$store.app.base + 'logos/tailwind.svg'" alt="Tailwind CSS logo" class="h-14 w-14" />
-        </div>
-        <h1 class="mb-6 bg-gradient-to-r from-brand-1 via-brand-2 to-brand-3 bg-clip-text text-5xl font-bold text-transparent">Vite + Alpine + Tailwind</h1>
-        <p class="mx-auto mb-8 max-w-2xl text-xl opacity-80">
-            A lightweight SPA starter: pages are plain HTML files, routed entirely
-            on the client with pinecone-router.
-        </p>
-        <div class="flex flex-wrap justify-center gap-4">
-            <a href="/about" class="btn btn-primary">Get Started</a>
-            <a href="https://github.com/vzsoares/vite-alpine-tailwind" target="_blank" rel="noopener" native class="btn btn-outline">View on GitHub</a>
-        </div>
-    </div>
-</section>
+<div x-data="textVisualizer" class="flex flex-1 flex-col items-center justify-center p-6">
 
-<section class="px-8 py-16">
-    <div class="mx-auto max-w-6xl">
-        <h2 class="mb-12 text-center text-3xl font-bold">Features</h2>
-        <div class="grid gap-8 md:grid-cols-3">
-            <div class="card border border-base-300 bg-base-100 transition-shadow hover:shadow-lg">
-                <div class="card-body">
-                    <h3 class="card-title"><img :src="$store.app.base + 'logos/vite.svg'" alt="Vite" class="h-8 w-8" /><span>Vite</span></h3>
-                    <p class="opacity-80">Lightning-fast dev server and optimized builds with HMR and true ESM support.</p>
-                </div>
-            </div>
-            <div class="card border border-base-300 bg-base-100 transition-shadow hover:shadow-lg">
-                <div class="card-body">
-                    <h3 class="card-title"><img :src="$store.app.base + 'logos/alpine.svg'" alt="Alpine.js" class="h-8 w-8" /><span>Alpine.js</span></h3>
-                    <p class="opacity-80">Minimal framework for client-side interactivity — the reactivity behind every page here.</p>
-                </div>
-            </div>
-            <div class="card border border-base-300 bg-base-100 transition-shadow hover:shadow-lg">
-                <div class="card-body">
-                    <h3 class="card-title"><img :src="$store.app.base + 'logos/tailwind.svg'" alt="Tailwind CSS" class="h-8 w-8" /><span>Tailwind CSS</span></h3>
-                    <p class="opacity-80">Utility-first styling (+ daisyUI components) applied straight to the page markup.</p>
-                </div>
-            </div>
+    <!-- Input view -->
+    <div x-show="!activeMode" class="flex w-full max-w-sm flex-col gap-5">
+        <input
+            type="text"
+            x-model="text"
+            placeholder="Type something..."
+            class="input input-bordered w-full text-base"
+            data-testid="visualizer-input"
+        />
+
+        <div class="grid grid-cols-2 gap-3">
+            <button
+                type="button"
+                @click="open('qr')"
+                :disabled="!text.trim()"
+                class="flex h-20 flex-col items-center justify-center gap-1.5 rounded-xl border border-base-300 bg-base-100 text-sm font-medium transition-colors hover:bg-base-200 disabled:cursor-not-allowed disabled:opacity-30"
+                data-testid="mode-qr"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75V16.5zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 18.75h.75v.75h-.75v-.75zM18.75 13.5h.75v.75h-.75v-.75zM18.75 18.75h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75V16.5z" />
+                </svg>
+                QR Code
+            </button>
+
+            <button
+                type="button"
+                @click="open('large')"
+                :disabled="!text.trim()"
+                class="flex h-20 flex-col items-center justify-center gap-1.5 rounded-xl border border-base-300 bg-base-100 text-sm font-medium transition-colors hover:bg-base-200 disabled:cursor-not-allowed disabled:opacity-30"
+                data-testid="mode-large"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                </svg>
+                Large Text
+            </button>
+
+            <button
+                type="button"
+                @click="open('marquee')"
+                :disabled="!text.trim()"
+                class="flex h-20 flex-col items-center justify-center gap-1.5 rounded-xl border border-base-300 bg-base-100 text-sm font-medium transition-colors hover:bg-base-200 disabled:cursor-not-allowed disabled:opacity-30"
+                data-testid="mode-marquee"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                </svg>
+                Marquee
+            </button>
+
+            <button
+                type="button"
+                @click="open('blink')"
+                :disabled="!text.trim()"
+                class="flex h-20 flex-col items-center justify-center gap-1.5 rounded-xl border border-base-300 bg-base-100 text-sm font-medium transition-colors hover:bg-base-200 disabled:cursor-not-allowed disabled:opacity-30"
+                data-testid="mode-blink"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                </svg>
+                Blink
+            </button>
         </div>
     </div>
-</section>
 
-<section class="px-8 py-16">
-    <div class="mx-auto max-w-6xl">
-        <h2 class="mb-4 text-center text-3xl font-bold">Interactive Demo</h2>
-        <p class="mx-auto mb-12 max-w-2xl text-center opacity-80">
-            A typed Alpine component — <code class="font-mono text-brand-1">counter()</code> in
-            <code class="font-mono text-brand-1">alpine.ts</code> — wired up with
-            <code class="font-mono text-brand-1">x-data</code>.
-        </p>
-        <div
-            x-data="counter(0)"
-            data-testid="demo-card"
-            class="card mx-auto max-w-sm border border-base-300 bg-base-100 shadow-sm"
+    <!-- Fullscreen overlay -->
+    <div
+        x-show="activeMode"
+        x-cloak
+        @keydown.escape.window="close()"
+        class="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-base-100"
+        data-testid="fullscreen-overlay"
+    >
+        <button
+            type="button"
+            @click="close()"
+            class="absolute right-3 top-3 z-10 btn btn-ghost btn-sm btn-circle opacity-40 hover:opacity-100"
+            aria-label="Close"
+            data-testid="close-btn"
         >
-            <div class="card-body items-center text-center">
-                <p
-                    data-testid="counter-value"
-                    x-text="count"
-                    class="bg-gradient-to-r from-brand-1 to-brand-2 bg-clip-text text-5xl font-bold text-transparent"
-                >0</p>
-                <div class="card-actions mt-4 justify-center">
-                    <button type="button" data-testid="counter-decrement" @click="decrement()" aria-label="Decrement" class="btn btn-outline">−</button>
-                    <button type="button" data-testid="counter-reset" @click="reset()" class="btn btn-ghost">Reset</button>
-                    <button type="button" data-testid="counter-increment" @click="increment()" aria-label="Increment" class="btn btn-primary">+</button>
-                </div>
-            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+
+        <!-- QR Code: square filling the smaller viewport dimension -->
+        <div
+            x-show="activeMode === 'qr'"
+            x-cloak
+            x-html="qrSvg"
+            class="[&>svg]:block [&>svg]:h-full [&>svg]:w-full"
+            style="width: 100vmin; height: 100vmin;"
+            data-testid="view-qr"
+        ></div>
+
+        <!-- Large Text: fitText scales to fill the full viewport -->
+        <p
+            x-show="activeMode === 'large'"
+            x-cloak
+            x-ref="largeText"
+            x-text="text"
+            class="w-full break-words text-center font-bold leading-none"
+            data-testid="view-large"
+        ></p>
+
+        <!-- Marquee: font fills viewport height, scrolls full width -->
+        <div
+            x-show="activeMode === 'marquee'"
+            x-cloak
+            class="w-full overflow-hidden"
+            data-testid="view-marquee"
+        >
+            <p
+                x-text="text"
+                class="animate-marquee whitespace-nowrap font-bold leading-none"
+                style="font-size: 100vh;"
+            ></p>
         </div>
+
+        <!-- Blink: fitText scales to fill the full viewport -->
+        <p
+            x-show="activeMode === 'blink'"
+            x-cloak
+            x-ref="blinkText"
+            x-text="text"
+            class="w-full animate-blink break-words text-center font-bold leading-none"
+            data-testid="view-blink"
+        ></p>
     </div>
-</section>
+
+</div>

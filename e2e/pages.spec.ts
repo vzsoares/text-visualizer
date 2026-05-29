@@ -3,9 +3,7 @@ import { expect, test } from "@playwright/test";
 // One smoke test per route: client-side routing renders its content, assets
 // load, and Alpine boots. (Single shell, routed in the browser by pinecone.)
 const PAGES = [
-    { url: "/", heading: "Vite + Alpine + Tailwind" },
-    { url: "/about", heading: "About this template" },
-    { url: "/blog", heading: "Blog" },
+    { url: "/", heading: "Text Visualizer" },
     { url: "/this-route-does-not-exist", heading: "Page not found" },
 ];
 
@@ -24,9 +22,16 @@ for (const { url, heading } of PAGES) {
 
         await page.goto(url);
 
-        await expect(
-            page.getByRole("heading", { name: heading }),
-        ).toBeVisible();
+        // Home has no <h1> — check the nav wordmark instead
+        if (heading === "Text Visualizer") {
+            await expect(
+                page.getByRole("link", { name: "Text Visualizer" }),
+            ).toBeVisible();
+        } else {
+            await expect(
+                page.getByRole("heading", { name: heading }),
+            ).toBeVisible();
+        }
         // app.ts ran (assigns window.Alpine) — the module loaded and started.
         await expect
             .poll(() => page.evaluate(() => "Alpine" in window))

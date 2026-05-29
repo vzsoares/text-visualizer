@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { blogPost, counter } from "./alpine";
+import { blogPost, counter, textVisualizer } from "./alpine";
 
 describe("counter", () => {
     it("increments, decrements, and resets from its start value", () => {
@@ -41,5 +41,48 @@ describe("blogPost", () => {
         expect(b.post).toBeUndefined();
         expect(b.prev).toBeUndefined();
         expect(b.next).toBeUndefined();
+    });
+});
+
+describe("textVisualizer", () => {
+    it("initializes with empty text and no active mode", () => {
+        const v = textVisualizer();
+        expect(v.text).toBe("");
+        expect(v.activeMode).toBeNull();
+        expect(v.qrSvg).toBe("");
+    });
+
+    it("open() sets the active mode", () => {
+        // Inject a noop $nextTick — Alpine provides this at runtime; not available in unit tests.
+        const v = Object.assign(textVisualizer(), {
+            $nextTick: (_cb: () => void) => {},
+        });
+        v.open("large");
+        expect(v.activeMode).toBe("large");
+        v.open("blink");
+        expect(v.activeMode).toBe("blink");
+    });
+
+    it("close() clears the active mode", () => {
+        const v = textVisualizer();
+        v.open("marquee");
+        v.close();
+        expect(v.activeMode).toBeNull();
+    });
+
+    it("open('qr') with text generates an SVG", () => {
+        const v = Object.assign(textVisualizer(), {
+            $nextTick: (_cb: () => void) => {},
+        });
+        v.text = "hello";
+        v.open("qr");
+        expect(v.qrSvg).toContain("<svg");
+    });
+
+    it("updateQr leaves qrSvg empty for blank text", () => {
+        const v = textVisualizer();
+        v.text = "   ";
+        v.updateQr();
+        expect(v.qrSvg).toBe("");
     });
 });

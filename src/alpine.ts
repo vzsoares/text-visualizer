@@ -1,3 +1,4 @@
+import { renderSVG } from "uqr";
 import { type Post, posts } from "./content/posts";
 
 /** Reactive state for the `counter` demo component. */
@@ -52,6 +53,97 @@ export function blogPost(): BlogPostState {
             this.post = index >= 0 ? posts[index] : undefined;
             this.prev = index > 0 ? posts[index - 1] : undefined;
             this.next = index >= 0 ? posts[index + 1] : undefined;
+        },
+    };
+}
+
+export type VisualizerMode = "qr" | "large" | "marquee" | "blink";
+
+export interface TextVisualizerState {
+    text: string;
+    activeMode: VisualizerMode | null;
+    qrSvg: string;
+    open(m: VisualizerMode): void;
+    close(): void;
+    updateQr(): void;
+    fitText(el: HTMLElement): void;
+    init(): void;
+}
+
+type AlpineThis = TextVisualizerState & {
+    $watch: (k: string, cb: () => void) => void;
+    $nextTick: (cb: () => void) => void;
+    $refs: Record<string, HTMLElement>;
+};
+
+export function textVisualizer(): TextVisualizerState {
+    return {
+        text: "",
+        activeMode: null,
+        qrSvg: "",
+
+        init(this: AlpineThis) {
+            this.$watch("text", () => {
+                if (this.activeMode === "qr") this.updateQr();
+            });
+        },
+
+        open(this: AlpineThis, m: VisualizerMode) {
+            this.activeMode = m;
+            if (m === "qr") this.updateQr();
+            if (m === "large" || m === "blink") {
+                this.$nextTick(() => {
+                    const el =
+                        this.$refs[m === "large" ? "largeText" : "blinkText"];
+                    if (el) this.fitText(el);
+                });
+            }
+        },
+
+        close(this: TextVisualizerState) {
+            this.activeMode = null;
+        },
+
+        updateQr(this: TextVisualizerState) {
+            this.qrSvg = this.text.trim() ? renderSVG(this.text) : "";
+        },
+
+        // Binary-search the largest font-size (px) where the text fits within
+        // the viewport. Uses an off-screen clone so overflow:hidden on the
+        // overlay doesn't skew measurements.
+        fitText(this: TextVisualizerState, el: HTMLElement) {
+            const computed = getComputedStyle(el);
+            const helper = document.createElement("span");
+            helper.style.cssText = [
+                "position:fixed",
+                "left:-9999px",
+                "top:-9999px",
+                `max-width:${window.innerWidth}px`,
+                `font-family:${computed.fontFamily}`,
+                `font-weight:${computed.fontWeight}`,
+                `word-break:${computed.wordBreak}`,
+                `overflow-wrap:${computed.overflowWrap}`,
+                "display:block",
+            ].join(";");
+            helper.textContent = el.textContent ?? "";
+            document.body.appendChild(helper);
+
+            let lo = 8;
+            let hi = 3000;
+            while (hi - lo > 2) {
+                const mid = Math.round((lo + hi) / 2);
+                helper.style.fontSize = `${mid}px`;
+                if (
+                    helper.scrollWidth <= window.innerWidth &&
+                    helper.scrollHeight <= window.innerHeight
+                ) {
+                    lo = mid;
+                } else {
+                    hi = mid;
+                }
+            }
+            document.body.removeChild(helper);
+            el.style.fontSize = `${lo}px`;
         },
     };
 }
