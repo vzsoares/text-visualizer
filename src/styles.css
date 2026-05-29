@@ -45,7 +45,7 @@
         transform: translateX(0);
     }
     100% {
-        transform: translateX(-50%);
+        transform: translateX(calc(-1 * var(--marquee-dist, 100vw)));
     }
 }
 

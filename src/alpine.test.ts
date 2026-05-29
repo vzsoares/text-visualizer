@@ -64,7 +64,9 @@ describe("textVisualizer", () => {
     });
 
     it("close() clears the active mode", () => {
-        const v = textVisualizer();
+        const v = Object.assign(textVisualizer(), {
+            $nextTick: (_cb: () => void) => {},
+        });
         v.open("marquee");
         v.close();
         expect(v.activeMode).toBeNull();

@@ -98,6 +98,20 @@ export function textVisualizer(): TextVisualizerState {
                     if (el) this.fitText(el);
                 });
             }
+            if (m === "marquee") {
+                this.$nextTick(() => {
+                    const span = this.$refs.marqueeSpan;
+                    const container = this.$refs.marqueeEl;
+                    if (span && container) {
+                        // Set the exact pixel distance so the animation moves
+                        // by exactly one copy's width — guarantees a seamless loop.
+                        container.style.setProperty(
+                            "--marquee-dist",
+                            `${span.offsetWidth}px`,
+                        );
+                    }
+                });
+            }
         },
 
         close(this: TextVisualizerState) {

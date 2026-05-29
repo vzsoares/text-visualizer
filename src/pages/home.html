@@ -114,8 +114,8 @@
             class="w-full overflow-hidden"
             data-testid="view-marquee"
         >
-            <div class="animate-marquee flex shrink-0 font-bold leading-none" style="font-size: 100vh;">
-                <span x-text="text" class="shrink-0 pr-[0.5em]"></span>
+            <div x-ref="marqueeEl" class="animate-marquee inline-flex font-bold leading-none" style="font-size: 100vh;">
+                <span x-ref="marqueeSpan" x-text="text" class="shrink-0 pr-[0.5em]"></span>
                 <span x-text="text" class="shrink-0 pr-[0.5em]"></span>
             </div>
         </div>
