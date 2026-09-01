@@ -1,3 +1,17 @@
+## v1.8.0
+
+### Features
+- add marquee text size control
+
+### Chores
+- bump version to 1.8.0
+- bump gitleaks/gitleaks-action from 2 to 3
+
+### Other
+- Merge pull request #1 from vzsoares/dependabot/github_actions/actions/deploy-pages-5
+- Merge pull request #2 from vzsoares/dependabot/github_actions/gitleaks/gitleaks-action-3
+- Bump actions/deploy-pages from 4 to 5
+
 ## v1.7.1
 
 ### Bug Fixes
