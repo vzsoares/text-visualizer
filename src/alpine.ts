@@ -65,6 +65,8 @@ export interface TextVisualizerState {
     qrSvg: string;
     marqueeDist: number;
     marqueeFontPx: number;
+    /** Vertical shift (px) that centres the marquee's glyph ink, not its em box. */
+    marqueeOffsetPx: number;
     morseOn: boolean;
     morseCode: string;
     // Static reference data for the template.
@@ -117,6 +119,7 @@ export function textVisualizer(): TextVisualizerData {
         qrSvg: "",
         marqueeDist: 0,
         marqueeFontPx: 0,
+        marqueeOffsetPx: 0,
         morseOn: false,
         morseCode: "",
 
@@ -305,7 +308,8 @@ export function textVisualizer(): TextVisualizerData {
 
         // Size the marquee font so the glyph ink height (ascent+descent, so
         // descenders like "g" aren't clipped) fits the user-chosen share of
-        // the cross-axis (marqueeSize %, 90% by default).
+        // the cross-axis (marqueeSize %, 90% by default), and work out the
+        // shift that centres that ink — see marqueeOffsetPx below.
         fitMarqueeFont(this: TextVisualizerState, el: HTMLElement) {
             const vertical = this.orientation === "vertical";
             const availH = vertical ? window.innerWidth : window.innerHeight;
@@ -316,15 +320,32 @@ export function textVisualizer(): TextVisualizerData {
             const probe = 100;
             ctx.font = `${computed.fontWeight} ${probe}px ${computed.fontFamily}`;
             const metrics = ctx.measureText(this.text || " ");
-            const ink =
-                metrics.actualBoundingBoxAscent +
-                metrics.actualBoundingBoxDescent;
-            if (ink > 0) {
-                const fill = marqueeFillRatio(this.marqueeSize);
-                this.marqueeFontPx = Math.floor(
-                    (availH * fill) / (ink / probe),
-                );
-            }
+            const inkAsc = metrics.actualBoundingBoxAscent;
+            const inkDesc = metrics.actualBoundingBoxDescent;
+            const ink = inkAsc + inkDesc;
+            if (ink <= 0) return;
+
+            const fill = marqueeFillRatio(this.marqueeSize);
+            const px = Math.floor((availH * fill) / (ink / probe));
+            this.marqueeFontPx = px;
+
+            // What gets centred by the flex stage is the em box, not the ink.
+            // With line-height 1 the em box's centre sits (fontAscent −
+            // fontDescent)/2 above the baseline while the ink's centre sits
+            // (inkAscent − inkDescent)/2 above it, so the ink hangs low by the
+            // difference — enough for a "g" to fall off the bottom edge at
+            // large sizes. Shift by that difference so the ink itself is
+            // centred and the full cross-axis is usable.
+            const fontAsc = metrics.fontBoundingBoxAscent;
+            const fontDesc = metrics.fontBoundingBoxDescent;
+            this.marqueeOffsetPx =
+                Number.isFinite(fontAsc) && Number.isFinite(fontDesc)
+                    ? Math.round(
+                          ((px / probe) *
+                              (inkAsc - inkDesc - (fontAsc - fontDesc))) /
+                              2,
+                      )
+                    : 0;
         },
 
         measureMarquee(this: AlpineThis) {

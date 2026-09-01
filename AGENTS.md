@@ -95,8 +95,16 @@ release-it (releases). Vite 8 is Rolldown/**oxc**-based. Runtime libs: `alpinejs
   speed change) would wipe, breaking the loop. Measure only after a `requestAnimationFrame`
   so layout has committed.
 - **Marquee font is canvas-measured** (`fitMarqueeFont`): `ctx.measureText` gives the glyph
-  ink height (`actualBoundingBoxAscent + actualBoundingBoxDescent`), sized to ~90% of the
-  cross-axis so descenders (g/p/q) aren't clipped — a fixed `font-size: 100vh` clips them.
+  ink height (`actualBoundingBoxAscent + actualBoundingBoxDescent`), sized to the
+  user-chosen share of the cross-axis (`marqueeSize`, 90% by default) — a fixed
+  `font-size: 100vh` clips descenders.
+- **The marquee centres its ink, not its em box.** The flex stage centres the *em box*, but
+  with `leading-none` the ink centre sits `((fontAsc − fontDesc) − (inkAsc − inkDesc))/2`
+  *below* it, so a "g"/"p" tail hangs past the bottom edge. `fitMarqueeFont` computes that
+  difference from the same `TextMetrics` (`fontBoundingBox*` vs `actualBoundingBox*`) into
+  `marqueeOffsetPx`, applied as a `translateY` on the marquee wrapper. The wrapper carries
+  **no `overflow-hidden`** — it's only as tall as the em box, so clipping there cut the
+  descenders off; the stage already clips at the viewport edge.
 - **All text modes (large, mirror, blink) must call `fitText`.** They share `TEXT_REFS`
   (mode → `x-ref`); forgetting one leaves that mode at the default tiny font.
 - **Vertical layout rotates the stage**, not each element: the overlay's inner stage gets

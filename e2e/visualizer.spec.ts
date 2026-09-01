@@ -98,6 +98,23 @@ test("marquee text size scales the marquee font", async ({ page }) => {
     expect(await fontAt()).toBeLessThan(big);
 });
 
+test("marquee lifts descenders off the bottom edge", async ({ page }) => {
+    // Regression: the flex stage centres the em box, but the glyph ink sits
+    // below its centre — at large sizes a "g"/"p" tail fell off the screen.
+    await page.goto("/");
+    await page.getByTestId("visualizer-input").fill("gjpqy Casa");
+    await page.getByTestId("control-marquee-size").fill("100");
+    await page.getByTestId("mode-marquee").click();
+    const view = page.getByTestId("view-marquee");
+    await expect(view).toBeVisible();
+
+    const shiftY = await view.evaluate((el) => {
+        const m = new DOMMatrixReadOnly(getComputedStyle(el).transform);
+        return m.f;
+    });
+    expect(shiftY).toBeLessThan(0);
+});
+
 test("swap button exchanges the foreground and background colors", async ({
     page,
 }) => {

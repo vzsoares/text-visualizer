@@ -152,7 +152,17 @@
             ></p>
 
             <!-- Marquee -->
-            <div x-show="activeMode === 'marquee'" x-cloak class="w-full overflow-hidden" data-testid="view-marquee">
+            <!-- No overflow-hidden here: the stage already clips at the
+                 viewport edge, and clipping at this box (which is only as tall
+                 as the em box) would cut the descenders off. Object-form
+                 :style so it can't clobber x-show's display. -->
+            <div
+                x-show="activeMode === 'marquee'"
+                x-cloak
+                class="w-full"
+                :style="{ transform: `translateY(${marqueeOffsetPx}px)` }"
+                data-testid="view-marquee"
+            >
                 <div
                     x-ref="marqueeEl"
                     class="animate-marquee inline-flex font-bold leading-none"
