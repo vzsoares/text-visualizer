@@ -1,3 +1,9 @@
+## v1.8.1
+
+### Chores
+- bump version to 1.8.1
+- remove codeql and gitleaks workflows
+
 ## v1.8.0
 
 ### Features
