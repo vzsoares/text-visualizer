@@ -1,6 +1,6 @@
 {
     "name": "text-visualizer",
-    "version": "1.8.1",
+    "version": "1.8.2",
     "description": "Paste text, pick a format — QR code, big text, marquee, or blink — shown fullscreen.",
     "scripts": {
         "dev": "vite",
