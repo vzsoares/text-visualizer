@@ -1,3 +1,11 @@
+## v1.8.3
+
+### Bug Fixes
+- centre descenders using DOM-based baseline measurement
+
+### Chores
+- bump version to 1.8.3
+
 ## v1.8.2
 
 ### Bug Fixes
