@@ -1,3 +1,11 @@
+## v1.8.2
+
+### Bug Fixes
+- centre glyph ink instead of em box
+
+### Chores
+- bump version to 1.8.2
+
 ## v1.8.1
 
 ### Chores
