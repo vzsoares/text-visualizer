@@ -314,38 +314,87 @@ export function textVisualizer(): TextVisualizerData {
             const vertical = this.orientation === "vertical";
             const availH = vertical ? window.innerWidth : window.innerHeight;
             const computed = getComputedStyle(el);
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-            if (!ctx) return;
             const probe = 100;
-            ctx.font = `${computed.fontWeight} ${probe}px ${computed.fontFamily}`;
-            const metrics = ctx.measureText(this.text || " ");
-            const inkAsc = metrics.actualBoundingBoxAscent;
-            const inkDesc = metrics.actualBoundingBoxDescent;
-            const ink = inkAsc + inkDesc;
-            if (ink <= 0) return;
+            const font = `${computed.fontWeight} ${probe}px ${computed.fontFamily}`;
+            const text = this.text || " ";
 
+            // Where the browser will actually put the baseline, measured from
+            // the DOM rather than from canvas font metrics: an empty zero-size
+            // inline-block sits its bottom edge exactly on the baseline of the
+            // line it's in. Everything here scales linearly with font-size, so
+            // one measurement at `probe` px covers every size. (Canvas's
+            // fontBoundingBox* would answer the same question, but it's absent
+            // on older engines — Firefox only got it in 116 — and falling back
+            // to "no correction" is what let descenders clip.)
+            const probeEl = document.createElement("span");
+            probeEl.style.cssText = [
+                "position:fixed",
+                "left:-9999px",
+                "top:-9999px",
+                "white-space:pre",
+                // The `font` shorthand resets line-height, so it must come
+                // before the line-height we actually want to measure in.
+                `font:${font}`,
+                "line-height:1",
+            ].join(";");
+            probeEl.textContent = text;
+            const baselineMarker = document.createElement("span");
+            baselineMarker.style.cssText =
+                "display:inline-block;width:0;height:0";
+            probeEl.appendChild(baselineMarker);
+            document.body.appendChild(probeEl);
+            const boxTop = probeEl.getBoundingClientRect().top;
+            // Baseline offset inside a line-height:1 box, at `probe` px.
+            const baseline =
+                baselineMarker.getBoundingClientRect().bottom - boxTop;
+            // Fallback ink bound: the font's own line box always contains it.
+            probeEl.style.lineHeight = "normal";
+            const normalBox = probeEl.getBoundingClientRect();
+            const normalLineH = normalBox.height;
+            const normalBaseline =
+                baselineMarker.getBoundingClientRect().bottom - normalBox.top;
+            document.body.removeChild(probeEl);
+
+            // Ink height (ascent+descent of the actual glyphs) via canvas.
+            const ctx = document.createElement("canvas").getContext("2d");
+            let inkAsc = Number.NaN;
+            let inkDesc = Number.NaN;
+            if (ctx) {
+                ctx.font = font;
+                const m = ctx.measureText(text);
+                inkAsc = m.actualBoundingBoxAscent;
+                inkDesc = m.actualBoundingBoxDescent;
+            }
+            const inkOk =
+                Number.isFinite(inkAsc) &&
+                Number.isFinite(inkDesc) &&
+                inkAsc + inkDesc > 0;
+            // Without ink metrics, fit the font's line box instead: bigger
+            // than the ink, so the text comes out a little smaller but can
+            // never hang over the edge.
+            const measured = inkOk ? inkAsc + inkDesc : normalLineH;
+            if (measured <= 0) return;
+
+            // 2px of slack keeps the largest size off the edge despite the
+            // rounding below.
             const fill = marqueeFillRatio(this.marqueeSize);
-            const px = Math.floor((availH * fill) / (ink / probe));
+            const px = Math.max(
+                1,
+                Math.floor((availH * fill - 2) / (measured / probe)),
+            );
             this.marqueeFontPx = px;
 
-            // What gets centred by the flex stage is the em box, not the ink.
-            // With line-height 1 the em box's centre sits (fontAscent −
-            // fontDescent)/2 above the baseline while the ink's centre sits
-            // (inkAscent − inkDescent)/2 above it, so the ink hangs low by the
-            // difference — enough for a "g" to fall off the bottom edge at
-            // large sizes. Shift by that difference so the ink itself is
-            // centred and the full cross-axis is usable.
-            const fontAsc = metrics.fontBoundingBoxAscent;
-            const fontDesc = metrics.fontBoundingBoxDescent;
-            this.marqueeOffsetPx =
-                Number.isFinite(fontAsc) && Number.isFinite(fontDesc)
-                    ? Math.round(
-                          ((px / probe) *
-                              (inkAsc - inkDesc - (fontAsc - fontDesc))) /
-                              2,
-                      )
-                    : 0;
+            // What the flex stage centres is the line box, whose centre sits
+            // above the ink's centre (the ink hangs below the baseline by less
+            // than the box does). Shift by the difference so the ink itself is
+            // centred — otherwise a "g"/"p" tail runs past the bottom edge.
+            // Same idea on the fallback path, centring the font's line box
+            // (positioned off the same baseline) instead of the ink.
+            const k = px / probe;
+            const inkCentre = inkOk
+                ? baseline * k + ((inkDesc - inkAsc) * k) / 2
+                : (baseline - normalBaseline + normalLineH / 2) * k;
+            this.marqueeOffsetPx = Math.round(px / 2 - inkCentre);
         },
 
         measureMarquee(this: AlpineThis) {

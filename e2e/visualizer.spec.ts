@@ -91,28 +91,62 @@ test("marquee text size scales the marquee font", async ({ page }) => {
             await marquee.evaluate((el) => getComputedStyle(el).fontSize),
         );
 
+    await expect.poll(fontAt).toBeGreaterThan(0);
     const big = await fontAt();
     await page.getByTestId("close-btn").click();
     await page.getByTestId("control-marquee-size").fill("30");
     await page.getByTestId("mode-marquee").click();
-    expect(await fontAt()).toBeLessThan(big);
+    // Poll: the refit lands in Alpine's $nextTick, after the click resolves.
+    await expect.poll(fontAt).toBeLessThan(big);
 });
 
-test("marquee lifts descenders off the bottom edge", async ({ page }) => {
-    // Regression: the flex stage centres the em box, but the glyph ink sits
-    // below its centre — at large sizes a "g"/"p" tail fell off the screen.
+test("marquee never clips descenders against the screen edge", async ({
+    page,
+}) => {
+    // Regression: the wrapper's overflow-hidden was only as tall as the em
+    // box, and the stage centres that box rather than the glyph ink — so a
+    // "g"/"p" tail was cut off. Checked on real pixels, not on the geometry
+    // the app itself computed.
     await page.goto("/");
     await page.getByTestId("visualizer-input").fill("gjpqy Casa");
-    await page.getByTestId("control-marquee-size").fill("100");
+    await page.getByTestId("control-marquee-size").fill("90");
     await page.getByTestId("mode-marquee").click();
-    const view = page.getByTestId("view-marquee");
-    await expect(view).toBeVisible();
+    await expect(page.getByTestId("view-marquee")).toBeVisible();
+    await page.waitForTimeout(300);
 
-    const shiftY = await view.evaluate((el) => {
-        const m = new DOMMatrixReadOnly(getComputedStyle(el).transform);
-        return m.f;
-    });
-    expect(shiftY).toBeLessThan(0);
+    const shot = (await page.screenshot()).toString("base64");
+    const rows = await page.evaluate(async (data) => {
+        const res = await fetch(`data:image/png;base64,${data}`);
+        const bmp = await createImageBitmap(await res.blob());
+        const c = document.createElement("canvas");
+        c.width = bmp.width;
+        c.height = bmp.height;
+        const ctx = c.getContext("2d");
+        if (!ctx) throw new Error("no 2d context");
+        ctx.drawImage(bmp, 0, 0);
+        const { data: px } = ctx.getImageData(0, 0, c.width, c.height);
+        let first = -1;
+        let last = -1;
+        for (let y = 0; y < c.height; y++) {
+            let dark = 0;
+            for (let x = 0; x < c.width; x++) {
+                // ignore the close button in the top-right corner
+                if (y < 80 && x > c.width - 120) continue;
+                const i = (y * c.width + x) * 4;
+                if (px[i] < 100 && px[i + 1] < 100 && px[i + 2] < 100) dark++;
+            }
+            if (dark > 2) {
+                if (first < 0) first = y;
+                last = y;
+            }
+        }
+        return { first, last, height: c.height };
+    }, shot);
+
+    // At 90% the ink must clear both edges, and sit centred between them.
+    expect(rows.first).toBeGreaterThan(4);
+    expect(rows.last).toBeLessThan(rows.height - 5);
+    expect(Math.abs(rows.first - (rows.height - rows.last))).toBeLessThan(20);
 });
 
 test("swap button exchanges the foreground and background colors", async ({
