@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { textVisualizer } from "./alpine";
-import { blinkDurationSec, marqueeDurationSec } from "./modes";
+import {
+    blinkDurationSec,
+    MARQUEE_SIZE_DEFAULT,
+    marqueeDurationSec,
+} from "./modes";
 
 // Alpine injects $nextTick at runtime; in Node we stub it as a noop so the
 // DOM-touching callbacks inside open() never run (they're unreachable here).
@@ -15,6 +19,10 @@ describe("textVisualizer", () => {
         expect(v.qrSvg).toBe("");
         expect(v.color).toBe("#000000");
         expect(v.bg).toBe("#ffffff");
+    });
+
+    it("defaults the marquee text size to the shared default", () => {
+        expect(textVisualizer().marqueeSize).toBe(MARQUEE_SIZE_DEFAULT);
     });
 
     it("open() sets the active mode", () => {

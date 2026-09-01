@@ -4,9 +4,11 @@ import {
     DEFAULTS,
     decodeQuery,
     encodeQuery,
+    MARQUEE_SIZE_DEFAULT,
     MODES,
     type ModeDef,
     marqueeDurationSec,
+    marqueeFillRatio,
     morseTimeline,
     morseUnitMs,
     type Orientation,
@@ -53,6 +55,8 @@ export interface TextVisualizerState {
     // Persisted, user-controlled (all live on the home page).
     text: string;
     speed: number;
+    /** Marquee glyph height as a % of the cross-axis (see marqueeFillRatio). */
+    marqueeSize: number;
     color: string;
     bg: string;
     orientation: Orientation;
@@ -104,6 +108,7 @@ export function textVisualizer(): TextVisualizerData {
     return {
         text: persisted("", "text"),
         speed: persisted(SPEED_DEFAULT, "speed"),
+        marqueeSize: persisted(MARQUEE_SIZE_DEFAULT, "marqueeSize"),
         color: persisted(DEFAULTS.color, "color"),
         bg: persisted(DEFAULTS.bg, "bg"),
         orientation: persisted(defaultOrientation(), "orientation"),
@@ -134,6 +139,8 @@ export function textVisualizer(): TextVisualizerData {
             );
             if (shared.text !== undefined) this.text = shared.text;
             if (shared.speed !== undefined) this.speed = shared.speed;
+            if (shared.marqueeSize !== undefined)
+                this.marqueeSize = shared.marqueeSize;
             if (shared.color !== undefined) this.color = shared.color;
             if (shared.bg !== undefined) this.bg = shared.bg;
             if (shared.orientation !== undefined)
@@ -143,6 +150,7 @@ export function textVisualizer(): TextVisualizerData {
             for (const key of [
                 "text",
                 "speed",
+                "marqueeSize",
                 "color",
                 "bg",
                 "orientation",
@@ -155,6 +163,7 @@ export function textVisualizer(): TextVisualizerData {
             this.$watch("speed", () => {
                 if (this.activeMode === "morse") this.startMorse();
             });
+            this.$watch("marqueeSize", () => this.relayout());
             this.$watch("orientation", () => this.relayout());
             this.$watch("color", () => {
                 if (this.activeMode === "qr") this.updateQr();
@@ -295,7 +304,8 @@ export function textVisualizer(): TextVisualizerData {
         },
 
         // Size the marquee font so the glyph ink height (ascent+descent, so
-        // descenders like "g" aren't clipped) fits ~90% of the cross-axis.
+        // descenders like "g" aren't clipped) fits the user-chosen share of
+        // the cross-axis (marqueeSize %, 90% by default).
         fitMarqueeFont(this: TextVisualizerState, el: HTMLElement) {
             const vertical = this.orientation === "vertical";
             const availH = vertical ? window.innerWidth : window.innerHeight;
@@ -310,7 +320,10 @@ export function textVisualizer(): TextVisualizerData {
                 metrics.actualBoundingBoxAscent +
                 metrics.actualBoundingBoxDescent;
             if (ink > 0) {
-                this.marqueeFontPx = Math.floor((availH * 0.9) / (ink / probe));
+                const fill = marqueeFillRatio(this.marqueeSize);
+                this.marqueeFontPx = Math.floor(
+                    (availH * fill) / (ink / probe),
+                );
             }
         },
 
@@ -359,6 +372,7 @@ export function textVisualizer(): TextVisualizerData {
                 text: this.text,
                 mode: this.activeMode,
                 speed: this.speed,
+                marqueeSize: this.marqueeSize,
                 color: this.color,
                 bg: this.bg,
                 orientation: this.orientation,

@@ -5,8 +5,10 @@ import {
     decodeQuery,
     encodeQuery,
     isMode,
+    MARQUEE_SIZE_DEFAULT,
     MODE_IDS,
     marqueeDurationSec,
+    marqueeFillRatio,
     morseTimeline,
     morseUnitMs,
     textToMorse,
@@ -85,12 +87,25 @@ describe("speed mappers", () => {
     });
 });
 
+describe("marquee text size", () => {
+    it("maps the percentage to a 0–1 fill ratio", () => {
+        expect(marqueeFillRatio(50)).toBeCloseTo(0.5);
+        expect(marqueeFillRatio(MARQUEE_SIZE_DEFAULT)).toBeCloseTo(0.9);
+    });
+
+    it("clamps out-of-range sizes", () => {
+        expect(marqueeFillRatio(500)).toBeCloseTo(1);
+        expect(marqueeFillRatio(-20)).toBeCloseTo(0.1);
+    });
+});
+
 describe("deep-link encode/decode", () => {
     it("round-trips non-default state", () => {
         const state = {
             text: "Casa Comigo",
             mode: "marquee" as const,
             speed: 8,
+            marqueeSize: 40,
             color: "#ff0000",
             bg: "#00ff00",
             orientation: "vertical" as const,
@@ -103,6 +118,7 @@ describe("deep-link encode/decode", () => {
         const q = encodeQuery({
             text: "hi",
             speed: DEFAULTS.speed,
+            marqueeSize: DEFAULTS.marqueeSize,
             color: DEFAULTS.color,
             bg: DEFAULTS.bg,
             orientation: DEFAULTS.orientation,

@@ -228,6 +228,28 @@ export function morseUnitMs(speed: number): number {
     return Math.round(360 - 30 * (s - 1));
 }
 
+// ── Marquee text size ───────────────────────────────────────────────────────
+
+/**
+ * Marquee text size, as the percentage of the cross-axis (screen height when
+ * horizontal) that the glyph ink should fill. 90% is the default so descenders
+ * (g/p/q) keep a little breathing room.
+ */
+export const MARQUEE_SIZE_MIN = 10;
+export const MARQUEE_SIZE_MAX = 100;
+export const MARQUEE_SIZE_DEFAULT = 90;
+
+const clampMarqueeSize = (n: number) =>
+    Math.min(
+        MARQUEE_SIZE_MAX,
+        Math.max(MARQUEE_SIZE_MIN, Math.round(n) || MARQUEE_SIZE_DEFAULT),
+    );
+
+/** Fraction (0–1) of the cross-axis the marquee glyph ink should occupy. */
+export function marqueeFillRatio(size: number): number {
+    return clampMarqueeSize(size) / 100;
+}
+
 // ── Deep-link (URL) encode / decode ─────────────────────────────────────────
 
 export type Orientation = "horizontal" | "vertical";
@@ -236,6 +258,7 @@ export interface ShareState {
     text: string;
     mode: VisualizerMode | null;
     speed: number;
+    marqueeSize: number;
     color: string;
     bg: string;
     orientation: Orientation;
@@ -243,6 +266,7 @@ export interface ShareState {
 
 export const DEFAULTS = {
     speed: SPEED_DEFAULT,
+    marqueeSize: MARQUEE_SIZE_DEFAULT,
     color: "#000000",
     bg: "#ffffff",
     orientation: "horizontal" as Orientation,
@@ -255,6 +279,8 @@ export function encodeQuery(state: Partial<ShareState>): string {
     if (state.mode) p.set("mode", state.mode);
     if (state.speed != null && state.speed !== DEFAULTS.speed)
         p.set("speed", String(state.speed));
+    if (state.marqueeSize != null && state.marqueeSize !== DEFAULTS.marqueeSize)
+        p.set("size", String(state.marqueeSize));
     if (state.color && state.color !== DEFAULTS.color)
         p.set("color", state.color);
     if (state.bg && state.bg !== DEFAULTS.bg) p.set("bg", state.bg);
@@ -276,6 +302,9 @@ export function decodeQuery(search: string): Partial<ShareState> {
     const speed = p.get("speed");
     if (speed !== null && !Number.isNaN(Number(speed)))
         out.speed = clampSpeed(Number(speed));
+    const size = p.get("size");
+    if (size !== null && !Number.isNaN(Number(size)))
+        out.marqueeSize = clampMarqueeSize(Number(size));
     const color = p.get("color");
     if (color) out.color = color;
     const bg = p.get("bg");

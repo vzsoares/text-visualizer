@@ -80,6 +80,24 @@ test("changing a control does not pop the overlay open", async ({ page }) => {
     await expect(overlay).toBeHidden();
 });
 
+test("marquee text size scales the marquee font", async ({ page }) => {
+    await page.goto("/");
+    await page.getByTestId("visualizer-input").fill("Casa Comigo");
+    await page.getByTestId("mode-marquee").click();
+    const marquee = page.getByTestId("view-marquee").locator("> div");
+    await expect(marquee).toBeVisible();
+    const fontAt = async () =>
+        Number.parseFloat(
+            await marquee.evaluate((el) => getComputedStyle(el).fontSize),
+        );
+
+    const big = await fontAt();
+    await page.getByTestId("close-btn").click();
+    await page.getByTestId("control-marquee-size").fill("30");
+    await page.getByTestId("mode-marquee").click();
+    expect(await fontAt()).toBeLessThan(big);
+});
+
 test("swap button exchanges the foreground and background colors", async ({
     page,
 }) => {

@@ -45,6 +45,23 @@
                 <span class="text-xs opacity-50">fast</span>
             </label>
 
+            <!-- Marquee text size: share of the cross-axis the glyphs fill -->
+            <label class="flex items-center gap-3 text-sm" title="Marquee text size">
+                <span class="w-16 shrink-0 opacity-70">Size</span>
+                <span class="text-xs opacity-50">small</span>
+                <input
+                    type="range"
+                    min="10"
+                    max="100"
+                    step="5"
+                    x-model.number="marqueeSize"
+                    class="range range-xs flex-1"
+                    data-testid="control-marquee-size"
+                    aria-label="Marquee text size"
+                />
+                <span class="text-xs opacity-50">big</span>
+            </label>
+
             <!-- Colors / contrast -->
             <div class="flex items-center gap-3 text-sm">
                 <span class="w-16 shrink-0 opacity-70">Colors</span>
